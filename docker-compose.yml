@@ -1,0 +1,70 @@
+services:
+  msst-webui:
+    image: thesmallhancat/msst-webui-gpu:latest
+    container_name: msst-webui
+    restart: unless-stopped
+    command: bash start.sh
+    
+    #GPU支持配置
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+    # 端口映射
+    ports:
+      - "${PORT:-7860}:7860"
+    
+    # 环境变量
+    environment:
+      - PORT=${PORT:-7860}
+      - EXTRA_ARGS=${EXTRA_ARGS:-}
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-all}
+      - PYTHONUNBUFFERED=1
+      - HF_HOME=/app/pretrain
+      - GRADIO_TEMP_DIR=/app/cache
+    
+    # 从环境变量文件加载配置
+    env_file:
+      - .env
+    
+    # 数据卷挂载
+    volumes:
+      # 输入输出目录
+      - ${INPUT_DIR:-./input}:/app/input
+      - ${RESULTS_DIR:-./results}:/app/results
+      
+      # 模型存储
+      - ${PRETRAIN_DIR:-./pretrain}:/app/pretrain
+      
+      # 配置文件持久化
+      - ${CONFIGS_DIR:-./configs}:/app/configs
+      - ${DATA_DIR:-./data}:/app/data
+      - ${CONFIGS_BACKUP_DIR:-./configs_backup}:/app/configs_backup
+      - ${DATA_BACKUP_DIR:-./data_backup}:/app/data_backup
+      
+      # 缓存和临时文件
+      - ${TMPDIR:-./tmpdir}:/app/tmpdir
+      - ${LOGS_DIR:-./logs}:/app/logs
+      
+      # 预设文件
+      - ${PRESETS_DIR:-./presets}:/app/presets
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    # 网络配置
+    networks:
+      - msst-network
+
+networks:
+  msst-network:
+    driver: bridge 

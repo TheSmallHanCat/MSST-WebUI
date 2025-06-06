@@ -39,19 +39,7 @@ services:
       
       # 模型存储
       - ${PRETRAIN_DIR:-./pretrain}:/app/pretrain
-      
-      # 配置文件持久化
-      - ${CONFIGS_DIR:-./configs}:/app/configs
-      - ${DATA_DIR:-./data}:/app/data
-      - ${CONFIGS_BACKUP_DIR:-./configs_backup}:/app/configs_backup
-      - ${DATA_BACKUP_DIR:-./data_backup}:/app/data_backup
-      
-      # 缓存和临时文件
-      - ${TMPDIR:-./tmpdir}:/app/tmpdir
-      - ${LOGS_DIR:-./logs}:/app/logs
-      
-      # 预设文件
-      - ${PRESETS_DIR:-./presets}:/app/presets
+
     
     # 健康检查
     healthcheck:
